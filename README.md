@@ -36,6 +36,8 @@ Designed to be a low-distraction, voice-first device that lives on your desk —
 
 ## 🧭 Roadmap
 
+- Apply for data.gov.sg API key to access higher rate limits and improved reliability
+- Optimize weather data fetching by reducing redundant API calls and consolidating endpoint usage per update cycle
 - Main UI set-up
 - Design Tamagotchi behavior system
 - Integrate local LLM
