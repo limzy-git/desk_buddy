@@ -2,6 +2,18 @@ import requests, json
 
 AREA = "Clementi"
 
+def get_station_id(stations):
+    for station in stations:
+        if AREA in station["name"]:
+            return station["id"]
+    return None
+
+def get_reading_value(station_id, readings):
+    for reading in readings:
+        if reading["stationId"] == station_id:
+            return reading["value"]
+    return None
+
 def get_air_temp():    
     r = requests.get("https://api-open.data.gov.sg/v2/real-time/api/air-temperature")
     data = r.json()
@@ -9,18 +21,34 @@ def get_air_temp():
     stations = data["data"]["stations"]
     readings = data["data"]["readings"][0]["data"]
 
-    station_id = ""
-    value = ""
-
-    for station in stations:
-        if AREA in station["name"]:
-            station_id = station["id"]
-            break
-
-    for no in readings:
-        if no["stationId"] == station_id:
-            value = no["value"]
+    station_id = get_station_id(stations)
+    value = get_reading_value(station_id, readings)
+    
     return value
+
+def get_relative_humidity():
+    r = requests.get("https://api-open.data.gov.sg/v2/real-time/api/relative-humidity")
+    data = r.json()
+
+    stations = data["data"]["stations"]
+    readings = data["data"]["readings"][0]["data"]
+
+    station_id = get_station_id(stations)
+    humidity = get_reading_value(station_id, readings)
+
+    return humidity
+
+def get_wind_speed():
+    r = requests.get("https://api-open.data.gov.sg/v2/real-time/api/wind-speed")
+    data = r.json()
+
+    stations = data["data"]["stations"]
+    readings = data["data"]["readings"][0]["data"]
+
+    station_id = get_station_id(stations)
+    wind_speed = get_reading_value(station_id, readings)
+
+    return wind_speed
 
 def get_forecast_2h():    
     r = requests.get("https://api-open.data.gov.sg/v2/real-time/api/two-hr-forecast")
@@ -37,6 +65,16 @@ def get_forecast_2h():
         if area == AREA:
             nowcast_value = forecast
     return nowcast_value
+    
+def is_rain_warning(condition):
+    keywords = ["shower", "thunder", "drizzle", "rain"]
+    condition_lower = condition.lower()
+    
+    for word in keywords:
+        if word in condition_lower:
+            return True
+        
+    return False
 
 def get_3d_forecasts():
     r = requests.get("https://api-open.data.gov.sg/v2/real-time/api/four-day-outlook")
@@ -64,56 +102,6 @@ def get_3d_forecasts():
 
         three_day_forecasts.append(output)
     return three_day_forecasts
-
-def get_relative_humidity():
-    r = requests.get("https://api-open.data.gov.sg/v2/real-time/api/relative-humidity")
-    data = r.json()
-
-    stations = data["data"]["stations"]
-    readings = data["data"]["readings"][0]["data"]
-
-    station_id = ""
-    humidity = ""
-
-    for station in stations:
-        if AREA in station["name"]:
-            station_id = station["id"]
-            break
-
-    for reading in readings:
-        if reading["stationId"] == station_id:
-            humidity = reading["value"]
-    return humidity
-
-def get_wind_speed():
-    r = requests.get("https://api-open.data.gov.sg/v2/real-time/api/wind-speed")
-    data = r.json()
-
-    stations = data["data"]["stations"]
-    readings = data["data"]["readings"][0]["data"]
-
-    station_id = ""
-    wind_speed = ""
-
-    for station in stations:
-        if AREA in station["name"]:
-            station_id = station["id"]
-            break
-
-    for reading in readings:
-        if reading["stationId"] == station_id:
-            wind_speed = reading["value"]
-    return wind_speed
-
-def is_rain_warning(condition):
-    keywords = ["shower", "thunder", "drizzle", "rain"]
-    condition_lower = condition.lower()
-    
-    for word in keywords:
-        if word in condition_lower:
-            return True
-        
-    return False
 
 def get_weather():
     temperature = get_air_temp()
